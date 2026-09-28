@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from starter_code_openzh_updater import updater
+from starter_code_openzh_generator import updater
 
 
 @pytest.fixture

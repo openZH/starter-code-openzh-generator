@@ -831,7 +831,7 @@ wheels = [
 ]
 
 [[package]]
-name = "starter-code-openzh-updater"
+name = "starter-code-openzh-generator"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

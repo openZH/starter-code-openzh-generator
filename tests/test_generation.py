@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from starter_code_openzh_updater import updater
+from starter_code_openzh_generator import updater
 
 
 def release_files(root: Path) -> dict[Path, bytes]:

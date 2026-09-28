@@ -1,5 +1,7 @@
 # Generator notes
 
+- The generator repository and distribution are named `starter-code-openzh-generator`, with Python package `starter_code_openzh_generator`; the CLI remains `updater`. The publication repository is still `openZH/starter-code-openZH`. After moving a checkout, stale virtual-environment launchers may retain the old absolute path; `uv sync --locked --reinstall` refreshes them (add `--offline` when dependencies are cached).
+
 - The Requests notebook loader must decode HTTP compression and wrap `response.raw` in `BufferedReader` for pandas' Python CSV engine. Passing the raw response directly caused the delimiter sniffer to receive bytes instead of text. Set `raw.auto_close = False` so buffered reads can finish at EOF; nested context managers close the buffer and response. Loopback tests cover plain/gzip responses, headers, timeouts, streaming, HTTP/parsing errors, and cleanup.
 
 - Metadata lists (keywords, themes, publishers) should render as comma-separated values, not Python list representations. The old two-pass escaping encoded apostrophes with `html.escape`, then escaped the `#` inside its own `&#x27;` entity; notebook renderers displayed the entity literally. Escape original characters in one pass and preserve literal source entities without decoding them.

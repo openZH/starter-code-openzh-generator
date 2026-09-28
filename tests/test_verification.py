@@ -8,7 +8,7 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from starter_code_openzh_updater import updater
+from starter_code_openzh_generator import updater
 
 
 @pytest.mark.parametrize("artifact", ["index", "python", "r"])

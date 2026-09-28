@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from starter_code_openzh_updater.updater import apply_template_replacements
+from starter_code_openzh_generator.updater import apply_template_replacements
 
 
 def run_notebook_code(tmp_path: Path, code: str) -> None:

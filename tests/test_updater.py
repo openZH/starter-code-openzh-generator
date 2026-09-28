@@ -10,7 +10,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from starter_code_openzh_updater.updater import (
+from starter_code_openzh_generator.updater import (
     Config,
     create_python_notebooks,
     create_rmarkdown,
@@ -19,7 +19,7 @@ from starter_code_openzh_updater.updater import (
 
 
 @pytest.mark.parametrize(
-    "command", [["updater"], [sys.executable, "-m", "starter_code_openzh_updater"]]
+    "command", [["updater"], [sys.executable, "-m", "starter_code_openzh_generator"]]
 )
 @pytest.mark.parametrize("terminal", ["dumb", "xterm-256color"], ids=["plain", "colored"])
 def test_installed_cli_help_works_outside_checkout(

@@ -3,7 +3,7 @@ requires = ["uv_build>=0.12.16,<0.13"]
 build-backend = "uv_build"
 
 [project]
-name = "starter-code-openZH-updater"
+name = "starter-code-openzh-generator"
 version = "0.1.0"
 description = "Automatically generate Python and R starter code for Open Government Data Shops"
 readme = "README.md"
@@ -22,7 +22,7 @@ exclude-newer = "7 days"
 source-include = ["config.yaml", "_templates/**", "tests/**"]
 
 [project.scripts]
-updater = "starter_code_openzh_updater.updater:app"
+updater = "starter_code_openzh_generator.updater:app"
 
 [tool.ruff]
 line-length = 100

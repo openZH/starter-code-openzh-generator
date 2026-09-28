@@ -20,6 +20,8 @@ uv run updater
 uv run updater --verify-output
 ```
 
+The Python package is `starter_code_openzh_generator`; `uv run python -m starter_code_openzh_generator` also runs the generator. The `updater` command remains available.
+
 Find the generated files in `_work/02_python/` and `_work/01_r-markdown/`, and browse them through `_work/README.md`. The final command checks the generated output without downloading metadata or executing notebooks. Local runs do not publish anything.
 
 **Generated notebook directories are rebuilt on every run.** Keep hand-written files outside them, and run only one generator per output directory at a time.

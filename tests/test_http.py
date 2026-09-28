@@ -13,7 +13,7 @@ from threading import Thread
 import pandas as pd
 import pytest
 
-from starter_code_openzh_updater import updater
+from starter_code_openzh_generator import updater
 
 
 @pytest.mark.parametrize("compressed", [False, True], ids=["plain", "gzip"])
