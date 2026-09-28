@@ -1,0 +1,52 @@
+# Runtime configuration for the starter code generator.
+# Relative template_folder and temp_prefix paths use the current working directory.
+# Output subdirectories are relative to temp_prefix; template filenames to template_folder.
+
+paths:
+  temp_prefix: "_work/"
+  template_folder: "_templates/"
+  r_markdown_output: "01_r-markdown/"
+  python_output: "02_python/"
+
+templates:
+  header: "template_header.md"
+  readme: "template_readme.md"
+  python: "template_python.ipynb"
+  rmarkdown: "template_rmarkdown.Rmd"
+
+data_shop:
+  provider: "Canton of Zurich"
+  metadata_link: "https://www.web.statistik.zh.ch/ogd/daten/zhweb.json"
+  base_link: "https://www.zh.ch/de/politik-staat/statistik-daten/datenkatalog.html#/datasets/"
+  root_key: "dataset"
+
+github:
+  account: "openZH"
+  repo_name: "starter-code-openZH"
+  branch: "main"
+
+display:
+  title_max_chars: 200
+
+http:
+  timeout_seconds: 30
+  user_agent_generator: "OpenZH-StarterCode-Generator/1.0"
+  user_agent_python: "OpenZH-StarterCode-Python/1.0"
+  user_agent_r: "OpenZH-StarterCode-R/1.0"
+
+metadata_keys:
+  dataset:
+    - "issued"
+    - "modified"
+    - "startDate"
+    - "endDate"
+    - "theme"
+    - "keyword"
+    - "publisher"
+    - "landingPage"
+  distribution:
+    - "ktzhDistId"
+    - "title"
+    - "description"
+    - "issued"
+    - "modified"
