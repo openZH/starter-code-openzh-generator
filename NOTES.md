@@ -22,3 +22,10 @@
 - Publication stages and verifies all expected files before replacing the output root. The notebook directories are fully managed; other output files are preserved. Two-rename replacement rolls back ordinary errors but is not crash-atomic: a leftover sibling `.OUTPUT.previous` is retained for manual recovery and blocks further generation.
 
 - Release-preservation tests must compare all file bytes, not only `manifest.json`: a rollback can retain the manifest while damaging published artifacts. Verification tests separately exercise checksums and Python syntax with a matching checksum, since either gate alone can hide a regression in the other. Recovery tests retain a failed-rollback backup and verify that a subsequent run refuses to overwrite it.
+
+## eMudhra/emSign CA remediation (2026-10-26)
+
+certifi is constrained to >=2026.10.19 and locked at 2026.10.19. The seven-day
+uv cooldown remains; the temporary certifi exception can be removed after
+2026-10-27 02:24:17 UTC, once both release artifacts have aged seven days.
+Retain the security minimum and revalidate the lockfile after removing the exception.
