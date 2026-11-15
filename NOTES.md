@@ -27,8 +27,8 @@
 
 ## eMudhra/emSign CA remediation (2026-10-26)
 
-`pyproject.toml` retains the security minimum `certifi>=2026.10.19`; `uv.lock`
-currently selects 2026.10.23. The general seven-day uv cooldown remains, with
-a temporary exception for certifi in both files. The locked artifacts were
-uploaded on 2026-10-23 and have passed the cooldown. Removing the exception
-and revalidating the lockfile remains [follow-up work](PLAN.md).
+`uv.lock` retains certifi 2026.10.23, whose artifacts were uploaded on 2026-10-23
+and have passed the seven-day cooldown. The temporary certifi exception and
+minimum-version constraint have been removed. Regenerate `uv.lock` after changing
+these settings in `pyproject.toml`; stale lockfile metadata makes CI's
+`uv sync --locked` fail before tests run.
