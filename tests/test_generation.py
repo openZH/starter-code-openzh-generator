@@ -450,6 +450,39 @@ def test_only_csv_resources_are_published(
     assert not (config.temp_prefix / config.r_markdown_output / "non-csv.Rmd").exists()
 
 
+@pytest.mark.parametrize("fields", [{}, {"distribution": None}], ids=["omitted", "null"])
+def test_datasets_without_distributions_do_not_block_csv_generation(
+    config: updater.Config,
+    catalogue: pd.DataFrame,
+    monkeypatch: pytest.MonkeyPatch,
+    fields: dict[str, object],
+) -> None:
+    """Missing optional distributions cannot suppress other datasets' CSV resources."""
+    rows = [*catalogue.to_dict("records"), {"identifier": "unpublished", **fields}]
+    generate(monkeypatch, config, pd.DataFrame(rows))
+    manifest = json.loads((config.temp_prefix / "manifest.json").read_text())
+    assert manifest["datasets"] == 1
+    assert manifest["resources"] == 2
+    assert {
+        (entry["dataset_id"], entry["resource_id"]) for entry in manifest["resource_files"]
+    } == {("123@example", "one"), ("123@example", "two")}
+
+
+@pytest.mark.parametrize("distributions", [{}, "invalid", 1], ids=["object", "string", "number"])
+def test_non_null_malformed_distributions_preserve_previous_release(
+    generated_release: updater.Config,
+    catalogue: pd.DataFrame,
+    monkeypatch: pytest.MonkeyPatch,
+    distributions: object,
+) -> None:
+    """Missing-value handling must retain validation of malformed external data."""
+    before = release_files(generated_release.temp_prefix)
+    catalogue.at[0, "distribution"] = distributions
+    with pytest.raises(ValueError, match="Dataset distributions must be a list"):
+        generate(monkeypatch, generated_release, catalogue)
+    assert_release_preserved(generated_release, before)
+
+
 def test_catalogue_without_csv_preserves_previous_release(
     generated_release: updater.Config, catalogue: pd.DataFrame, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -480,14 +513,19 @@ def test_failed_generation_preserves_previous_release(
     assert_release_preserved(config, before)
 
 
+@pytest.mark.parametrize("omitted", [False, True], ids=["empty-list", "omitted"])
 def test_empty_catalogue_fails_without_replacing_output(
     config: updater.Config,
     catalogue: pd.DataFrame,
     monkeypatch: pytest.MonkeyPatch,
+    omitted: bool,
 ) -> None:
     generate(monkeypatch, config, catalogue)
     before = release_files(config.temp_prefix)
-    catalogue.at[0, "distribution"] = []
+    if omitted:
+        catalogue = catalogue.drop(columns="distribution")
+    else:
+        catalogue.at[0, "distribution"] = []
     with pytest.raises(ValueError, match="No CSV resources"):
         generate(monkeypatch, config, catalogue)
     assert_release_preserved(config, before)

@@ -246,9 +246,9 @@ def prepare_data_for_codebooks(data: pd.DataFrame, config: Config) -> pd.DataFra
             raise ValueError("Duplicate dataset identifier")
         datasets_seen.add(identifier.casefold())
         distributions = row.get("distribution")
-        if distributions is None:
-            continue
         if not isinstance(distributions, list):
+            if pd.api.types.is_scalar(distributions) and pd.isna(distributions):
+                continue
             raise ValueError("Dataset distributions must be a list")
         contact = row.get("contactPoint")
         if isinstance(contact, list):
@@ -503,6 +503,11 @@ def verify_output(config: Config) -> None:
     for entry in entries:
         dataset = safe_identifier(entry["dataset_id"])
         resource = safe_identifier(entry["resource_id"])
+        filename = f"{dataset}--{resource}"
+        if entry["python"] != str(config.python_output / f"{filename}.ipynb") or entry["r"] != str(
+            config.r_markdown_output / f"{filename}.Rmd"
+        ):
+            raise ValueError("Output integrity check failed: resource mapping")
         pairs.add((dataset, resource))
         expected_files.update([entry["python"], entry["r"]])
     if (
