@@ -24,11 +24,3 @@
 
 - Release-preservation tests must compare all file bytes, not only `manifest.json`: a rollback can retain the manifest while damaging published artifacts. Verification tests separately exercise checksums and Python syntax with a matching checksum, since either gate alone can hide a regression in the other. Recovery tests retain a failed-rollback backup and verify that a subsequent run refuses to overwrite it.
 - Manifest verification binds each dataset/resource ID pair to its deterministic Python and R filenames. Keep the regressions for swapped file references and changed IDs: file sets, counts and checksums alone cannot establish the association.
-
-## eMudhra/emSign CA remediation (2026-10-26)
-
-`uv.lock` retains certifi 2026.10.23, whose artifacts were uploaded on 2026-10-23
-and have passed the seven-day cooldown. The temporary certifi exception and
-minimum-version constraint have been removed. Regenerate `uv.lock` after changing
-these settings in `pyproject.toml`; stale lockfile metadata makes CI's
-`uv sync --locked` fail before tests run.
