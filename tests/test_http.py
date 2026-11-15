@@ -6,14 +6,47 @@ import subprocess
 import sys
 from dataclasses import replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
 from pathlib import Path
 from textwrap import indent
 from threading import Thread
 
 import pandas as pd
 import pytest
+import requests
 
 from starter_code_openzh_generator import updater
+
+
+@pytest.mark.parametrize(
+    ("status", "body", "error", "message"),
+    [
+        (503, b'{"dataset": []}', requests.HTTPError, "503"),
+        (200, b"not JSON", requests.exceptions.JSONDecodeError, "Expecting value"),
+        (200, b"[]", ValueError, "dataset list"),
+        (200, b"null", ValueError, "dataset list"),
+        (200, b"{}", ValueError, "dataset list"),
+        (200, b'{"dataset": {}}', ValueError, "dataset list"),
+    ],
+    ids=["http-error", "invalid-json", "array-root", "null-root", "missing-key", "object-datasets"],
+)
+def test_catalogue_rejects_failed_or_malformed_responses(
+    config: updater.Config,
+    monkeypatch: pytest.MonkeyPatch,
+    status: int,
+    body: bytes,
+    error: type[Exception],
+    message: str,
+) -> None:
+    """HTTP failures and invalid catalogue envelopes cannot become usable metadata."""
+    with BytesIO(body) as stream:
+        response = requests.Response()
+        response.status_code = status
+        response.raw = stream
+        monkeypatch.setattr(requests, "get", lambda *args, **kwargs: response)
+
+        with pytest.raises(error, match=message):
+            updater.get_current_json(config)
 
 
 @pytest.mark.parametrize("compressed", [False, True], ids=["plain", "gzip"])

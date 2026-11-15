@@ -12,7 +12,7 @@ Python notebooks can run in Colab or a local notebook environment; R Markdown fi
 
 ## Run locally
 
-With `uv` installed, run from the repository root:
+With `uv` installed, run from the repository root. The generator requires Python 3.13 or newer; the checkout and CI use Python 3.13.
 
 ```bash
 uv sync --locked
@@ -26,6 +26,8 @@ Find the generated files in `_work/02_python/` and `_work/01_r-markdown/`, and b
 
 **Generated notebook directories are rebuilt on every run.** Keep hand-written files outside them, and run only one generator per output directory at a time.
 
+Generation stages and verifies the output before replacing it, preserving files outside the notebook directories except the generated `README.md`, `index.md` and `manifest.json`. If replacement or rollback is interrupted, a sibling `._work.previous` backup may remain. Inspect and recover that backup before rerunning; generation refuses to overwrite it. A custom output root uses the backup name `.<output-root-name>.previous`.
+
 ## Customize
 
 Edit [config.yaml](config.yaml) to change catalogue settings, output paths, metadata fields or links to the published repository. Edit the files in [\_templates/](./_templates/) to change the overview and notebook content, preserving their template markers.
@@ -36,7 +38,7 @@ To use a different configuration:
 uv run updater --config path/to/config.yaml
 ```
 
-Relative paths are resolved from the working directory, including when using `--config`.
+The default configuration is `config.yaml` in the working directory. Relative paths to configuration files, output roots (`paths.temp_prefix`) and template folders use the working directory, including when using `--config`. Notebook output subdirectories are relative to the output root; template filenames are relative to the template folder.
 
 ## Publish automatically
 

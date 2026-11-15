@@ -52,6 +52,26 @@ def test_verification_rejects_inconsistent_manifest(
         updater.verify_output(config)
 
 
+@pytest.mark.parametrize("field", ["python", "r", "dataset_id", "resource_id"])
+def test_verification_rejects_incorrect_resource_file_associations(
+    generated_release: updater.Config, field: str
+) -> None:
+    """Valid files and checksums must still belong to the declared resource IDs."""
+    config = generated_release
+    path = config.temp_prefix / "manifest.json"
+    manifest = json.loads(path.read_text())
+    first, second = manifest["resource_files"]
+    if field in {"python", "r"}:
+        first[field], second[field] = second[field], first[field]
+    else:
+        for entry in manifest["resource_files"]:
+            entry[field] = "different-" + entry[field]
+    path.write_text(json.dumps(manifest))
+
+    with pytest.raises(ValueError, match="integrity"):
+        updater.verify_output(config)
+
+
 @pytest.mark.parametrize("directory", ["python_output", "r_markdown_output"])
 def test_verification_rejects_unlisted_managed_files(
     generated_release: updater.Config, directory: str

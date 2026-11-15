@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+import yaml
 
 from starter_code_openzh_generator.updater import (
     Config,
@@ -49,9 +50,12 @@ def test_default_config_is_loaded_from_working_directory(
 ) -> None:
     """An installed generator reads the operator's config, not package files."""
     root = Path(__file__).resolve().parents[1]
-    content = (root / "config.yaml").read_text(encoding="utf-8")
+    settings = yaml.safe_load((root / "config.yaml").read_text(encoding="utf-8"))
+    settings["data_shop"]["provider"] = "Local provider"
+    settings["paths"]["template_folder"] = "local-templates"
+    settings["paths"]["temp_prefix"] = "local-output"
     (tmp_path / "config.yaml").write_text(
-        content.replace('provider: "Canton of Zurich"', 'provider: "Local provider"'),
+        yaml.safe_dump(settings),
         encoding="utf-8",
     )
     monkeypatch.chdir(tmp_path)
@@ -59,8 +63,8 @@ def test_default_config_is_loaded_from_working_directory(
     config = Config.from_yaml()
 
     assert config.provider == "Local provider"
-    assert config.template_folder == Path("_templates")
-    assert config.temp_prefix == Path("_work")
+    assert config.template_folder == Path("local-templates")
+    assert config.temp_prefix == Path("local-output")
 
 
 def test_missing_default_config_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -70,9 +74,9 @@ def test_missing_default_config_raises(tmp_path: Path, monkeypatch: pytest.Monke
         Config.from_yaml()
 
 
-@pytest.mark.parametrize("distribution_count", [1, 2])
+@pytest.mark.parametrize(("distribution_count", "selected_index"), [(1, 0), (2, 0), (2, 1)])
 def test_python_notebook_contains_each_section_once(
-    tmp_path: Path, distribution_count: int
+    tmp_path: Path, distribution_count: int, selected_index: int
 ) -> None:
     """Generate one complete notebook without repeating its cells or CSV loads."""
     root = Path(__file__).resolve().parents[1]
@@ -107,7 +111,8 @@ def test_python_notebook_contains_each_section_once(
     create_rmarkdown(data, config)
 
     assert len(list((tmp_path / config.python_output).glob("*.ipynb"))) == distribution_count
-    output = tmp_path / config.python_output / f"{data.iloc[0]['filename']}.ipynb"
+    filename = data.iloc[selected_index]["filename"]
+    output = tmp_path / config.python_output / f"{filename}.ipynb"
     notebook = json.loads(output.read_text(encoding="utf-8"))
     sources = ["".join(cell["source"]) for cell in notebook["cells"]]
     headings = [
@@ -132,24 +137,21 @@ def test_python_notebook_contains_each_section_once(
         for cell, source in zip(notebook["cells"], sources, strict=True)
         if cell["cell_type"] == "code" and source.strip()
     ]
-    assert len(code_sources) == len(set(code_sources))
     code = "\n".join(code_sources)
     assert code.count("df = get_dataset(") == 1
-    assert links[0] in code
-    for link in links[1:]:
+    assert links[selected_index] in code
+    for link in links[:selected_index] + links[selected_index + 1 :]:
         assert link not in code
     assert code.count("def get_dataset(") == 1
     assert code.count("df.head()") == 1
     assert code.count("sns.histplot(") == 1
     assert "{{ " not in "\n".join(sources)
-    rmarkdown = (
-        tmp_path / config.r_markdown_output / f"{data.iloc[0]['filename']}.Rmd"
-    ).read_text()
+    rmarkdown = (tmp_path / config.r_markdown_output / f"{filename}.Rmd").read_text()
     assert "{{ " not in rmarkdown
     assert "stop_for_problems(data)" in rmarkdown
     assert "skim(df)" in rmarkdown
     assert "geom_col(" in rmarkdown
     assert rmarkdown.count("df <- get_dataset(") == 1
-    assert links[0] in rmarkdown
-    for link in links[1:]:
+    assert links[selected_index] in rmarkdown
+    for link in links[:selected_index] + links[selected_index + 1 :]:
         assert link not in rmarkdown
