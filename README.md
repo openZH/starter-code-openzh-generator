@@ -47,8 +47,13 @@ The default configuration is `config.yaml` in the working directory. Relative pa
 To set up publishing:
 
 1. Set the target account, repository and branch in both `config.yaml` and the workflow's publishing step. Keep its `source-directory` aligned with the configured output root.
-2. Add a `PAT` Actions secret with write access to the target repository. Use a repository dedicated to generated output and review `_work/LICENSE.md` before publishing.
-3. Enable GitHub Pages in the target repository, deploying from the target branch's root. The generated `index.md` serves as the entry page.
+2. Create a fine-grained personal access token with the target organization (`openZH` by default) as the resource owner. Select the target repository (`starter-code-openZH` by default) and grant **Contents → Read and write**. The token owner needs write access to the target repository, and the organization may require token approval. If you use a classic token, grant repository write access and authorize it for the organization if it uses SAML SSO. [GitHub token guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+3. In the generator repository, go to **Settings → Secrets and variables → Actions** and save the token as the repository secret `PAT`. The workflow passes it to the publishing action as `API_TOKEN_GITHUB`.
+4. Use a target repository dedicated to generated output and review `_work/LICENSE.md` before publishing. Enable GitHub Pages in the target repository and deploy from the target branch's root. The generated `index.md` serves as the entry page.
+
+### Troubleshoot publishing authentication
+
+If the push reports `Invalid username or token`, check the publishing step's log. A masked `API_TOKEN_GITHUB: ***` shows that the action received a value. Check whether the token expired, was revoked, or lost access to the target repository. Update the `PAT` secret if the token value changed, then select **Re-run failed jobs**. Verify that the generated commit lands on the target branch. A run that reports `Everything up-to-date` had no changes to publish.
 
 ## Development
 
